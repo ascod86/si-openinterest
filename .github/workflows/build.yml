@@ -1,0 +1,44 @@
+name: Build Windows EXE
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests pandas plotly pyinstaller
+
+      - name: Build EXE
+        run: |
+          pyinstaller --onefile --name si-openinterest --console fetch_oi.py
+        env:
+          PYTHONIOENCODING: utf-8
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "Si Open Interest"
+          body: |
+            ## Запуск
+            1. Скачай `si-openinterest.exe`
+            2. Положи рядом файл `token.txt` с API ключом от data.moex.com
+            3. Запусти `si-openinterest.exe` — откроется браузер с графиком
+          files: dist/si-openinterest.exe
+          prerelease: false
