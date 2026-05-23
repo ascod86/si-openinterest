@@ -273,13 +273,19 @@ function setTF(tf, btn) {{
 
 
 if __name__ == "__main__":
-    df = load_all_data()
-    snap = compute_oi(df)
-    daily = build_1d(snap)
-    print(f"\n{len(daily)} торговых дней")
-    print(f"Последняя точка: {daily.iloc[-1]['trade_session_date']}  ОИ = {daily.iloc[-1]['oi']:,.0f}")
-    plot(snap)
-    import sys
-    if sys.stdout.isatty():  # открываем браузер только при локальном запуске
+    try:
+        df = load_all_data()
+        snap = compute_oi(df)
+        daily = build_1d(snap)
+        print(f"\n{len(daily)} торговых дней")
+        print(f"Последняя точка: {daily.iloc[-1]['trade_session_date']}  ОИ = {daily.iloc[-1]['oi']:,.0f}")
+        plot(snap)
         import webbrowser
         webbrowser.open(f"file://{CHART_FILE}")
+        print("\nГотово! График открыт в браузере.")
+    except Exception as e:
+        print(f"\nОШИБКА: {e}")
+        import traceback
+        traceback.print_exc()
+    finally:
+        input("\nНажмите Enter для выхода...")
