@@ -11,8 +11,12 @@ from datetime import date, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
 
-CACHE_FILE = os.path.join(os.path.dirname(__file__), "data", "futoi_si.csv")
-CHART_FILE = os.path.join(os.path.dirname(__file__), "si_openinterest.html")
+import sys
+# При запуске из PyInstaller exe — файлы ищем рядом с exe, иначе рядом со скриптом
+BASE_DIR = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.abspath(__file__))
+
+CACHE_FILE = os.path.join(BASE_DIR, "data", "futoi_si.csv")
+CHART_FILE = os.path.join(BASE_DIR, "si_openinterest.html")
 
 TILL = date.today()
 FROM = date(2024, 1, 1)
@@ -20,7 +24,7 @@ FROM = date(2024, 1, 1)
 # Целевые точки за день для 4H (берём ближайший снимок к этому времени)
 TARGET_TIMES_4H = ["12:00", "16:00", "20:00", "23:50"]
 
-TOKEN = open(os.path.join(os.path.dirname(__file__), "token.txt")).read().strip()
+TOKEN = open(os.path.join(BASE_DIR, "token.txt")).read().strip()
 
 SESSION = requests.Session()
 SESSION.headers["Authorization"] = f"Bearer {TOKEN}"
