@@ -279,5 +279,7 @@ if __name__ == "__main__":
     print(f"\n{len(daily)} торговых дней")
     print(f"Последняя точка: {daily.iloc[-1]['trade_session_date']}  ОИ = {daily.iloc[-1]['oi']:,.0f}")
     plot(snap)
-    import webbrowser
-    webbrowser.open(f"file://{CHART_FILE}")
+    import sys
+    if sys.stdout.isatty():  # открываем браузер только при локальном запуске
+        import webbrowser
+        webbrowser.open(f"file://{CHART_FILE}")

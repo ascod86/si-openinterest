@@ -1,0 +1,39 @@
+name: Update Open Interest
+
+on:
+  schedule:
+    - cron: '0 21 * * 1-5'  # каждый будний день в 00:00 МСК (21:00 UTC)
+  workflow_dispatch:          # запуск вручную через кнопку на GitHub
+
+jobs:
+  update:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests pandas plotly
+
+      - name: Write token
+        run: echo "${{ secrets.MOEX_TOKEN }}" > token.txt
+        shell: bash
+
+      - name: Fetch data and build chart
+        run: python fetch_oi.py
+        shell: bash
+
+      - name: Commit updated data
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add data/ si_openinterest.html
+          git diff --cached --quiet || git commit -m "Auto-update: $(date +'%Y-%m-%d')"
+          git push
+        shell: bash
