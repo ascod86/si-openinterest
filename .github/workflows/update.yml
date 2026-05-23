@@ -5,6 +5,9 @@ on:
     - cron: '0 21 * * 1-5'  # каждый будний день в 00:00 МСК (21:00 UTC)
   workflow_dispatch:          # запуск вручную через кнопку на GitHub
 
+permissions:
+  contents: write
+
 jobs:
   update:
     runs-on: windows-latest
