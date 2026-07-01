@@ -2,3 +2,9 @@ token.txt
 config.py
 __pycache__/
 *.pyc
+.DS_Store
+data/cron.log
+*.app/
+dist/
+build/
+*.spec
