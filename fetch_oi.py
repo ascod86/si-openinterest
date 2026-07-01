@@ -39,7 +39,28 @@ FUTOI_CODES = [PAIRS[i][leg]["futoi"] for i in range(len(PAIRS)) for leg in ("ca
 CAL_ASSETS = {p["cal"]["forts_asset"] for p in PAIRS}
 PERP_SECIDS = {p["perp"]["forts_secid"] for p in PAIRS}
 
-TOKEN = open(os.path.join(BASE_DIR, "token.txt")).read().strip()
+def load_token() -> str:
+    """Читает ключ из token.txt рядом с программой. Если файла нет — просит вставить и сохраняет.
+    Понимает и ошибочное имя token.txt.txt, и BOM от Блокнота."""
+    for name in ("token.txt", "token.txt.txt"):
+        path = os.path.join(BASE_DIR, name)
+        if os.path.exists(path):
+            t = open(path, encoding="utf-8-sig").read().strip()
+            if t:
+                return t
+    if sys.stdin and sys.stdin.isatty():
+        print("Файл token.txt рядом с программой не найден.")
+        print("Вставь свой ключ Algopack (data.moex.com) и нажми Enter:")
+        t = input("> ").strip()
+        if t:
+            with open(os.path.join(BASE_DIR, "token.txt"), "w", encoding="utf-8") as f:
+                f.write(t)
+            print("Ключ сохранён в token.txt — в следующий раз вводить не нужно.\n")
+            return t
+    raise SystemExit("Нет ключа. Положи файл token.txt с ключом Algopack рядом с программой.")
+
+
+TOKEN = load_token()
 SESSION = requests.Session()
 SESSION.headers["Authorization"] = f"Bearer {TOKEN}"
 
@@ -282,7 +303,7 @@ def build_card(by_day: dict, times: dict):
         f.write(html)
 
 
-if __name__ == "__main__":
+def main():
     by_day, times = daily_oi()
     if len(by_day) < 2:
         print("Недостаточно данных: нужно минимум 2 торговых дня.")
@@ -301,3 +322,12 @@ if __name__ == "__main__":
     if "--no-open" not in sys.argv:
         import webbrowser
         webbrowser.open(f"file://{CARD_FILE}")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as e:
+        print(f"\nОшибка: {e}")
+        print("Проверь интернет и что ключ в token.txt действителен (data.moex.com).")
+        sys.exit(1)
