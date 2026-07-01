@@ -25,6 +25,15 @@
   }
   .tab:hover { color: #e6edf3; }
   .tab.active { background: #1f6feb; color: #fff; }
+  .daynav { display: inline-flex; align-items: center; gap: 12px; }
+  .navbtn {
+    border: 1px solid #232a33; cursor: pointer; padding: 7px 14px; border-radius: 9px;
+    font-size: 13px; font-weight: 700; color: #c9d1d9; background: #161b22;
+    font-family: inherit; transition: .15s;
+  }
+  .navbtn:hover:not(:disabled) { border-color: #1f6feb; color: #fff; }
+  .navbtn:disabled { opacity: .35; cursor: default; }
+  .daylabel { font-size: 13px; font-weight: 700; color: #8b949e; min-width: 150px; text-align: center; }
   .card {
     width: 560px; max-width: 92vw;
     background: #161b22; border: 1px solid #232a33; border-radius: 20px;
@@ -60,8 +69,685 @@
 </head>
 <body>
   <div class="tabs"><button class="tab active" data-pair="usd">$ USD/RUB</button><button class="tab" data-pair="cny">¥ CNY/RUB</button></div>
+  <div class="daynav">
+    <button id="prevDay" class="navbtn">◀ Пред. день</button>
+    <span id="dayLabel" class="daylabel"></span>
+    <button id="nextDay" class="navbtn">След. день ▶</button>
+  </div>
   
-    <section class="card" data-pair="usd">
+    <section class="card" data-pair="usd" data-day="0" hidden>
+      <div class="title">Открытый интерес · USD/RUB</div>
+      <div class="subtitle">Контракты, по последнему срезу дня. Календарный и вечный — раздельно (разный ГО,
+        в один итог не суммируются). В скобках — изменение в деньгах: Δконтрактов × ГО на контракт.</div>
+      
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">Si · календарные</span><span class="leg-hint">квартальные контракты</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Ср, 17 июня</div>
+            <div class="cv">6 647 146</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#ea394355">
+            <div class="cl">Последний · Чт, 18 июня</div>
+            <div class="cv">5 626 390</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#ea3943">▼ −1 020 756 <span class="pct">· −15.36%</span> <span class="money">(≈ −12,83 млрд ₽ ГО)</span></div>
+      </div>
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">USDRUBF · вечный</span><span class="leg-hint">перпетуал</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Ср, 17 июня</div>
+            <div class="cv">753 647</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Чт, 18 июня</div>
+            <div class="cv">791 844</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +38 197 <span class="pct">· +5.07%</span> <span class="money">(≈ +449,0 млн ₽ ГО)</span></div>
+      </div>
+      
+      <div class="total" style="border-color:#ea394355">
+        <div class="total-label">Итого по деньгам · ГО<div class="total-sub">чистый отток с рынка</div></div>
+        <div class="total-val" style="color:#ea3943">−12,39 млрд ₽</div>
+      </div>
+      <div class="footer">Срез 23:50 · обновлено 01.07.2026 09:32</div>
+    </section>
+    <section class="card" data-pair="cny" data-day="0" hidden>
+      <div class="title">Открытый интерес · CNY/RUB</div>
+      <div class="subtitle">Контракты, по последнему срезу дня. Календарный и вечный — раздельно (разный ГО,
+        в один итог не суммируются). В скобках — изменение в деньгах: Δконтрактов × ГО на контракт.</div>
+      
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">CNY · календарные</span><span class="leg-hint">квартальные контракты</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Ср, 17 июня</div>
+            <div class="cv">26 876 582</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#ea394355">
+            <div class="cl">Последний · Чт, 18 июня</div>
+            <div class="cv">18 898 234</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#ea3943">▼ −7 978 348 <span class="pct">· −29.69%</span> <span class="money">(≈ −9,35 млрд ₽ ГО)</span></div>
+      </div>
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">CNYRUBF · вечный</span><span class="leg-hint">перпетуал</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Ср, 17 июня</div>
+            <div class="cv">8 309 944</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Чт, 18 июня</div>
+            <div class="cv">8 366 885</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +56 941 <span class="pct">· +0.69%</span> <span class="money">(≈ +53,1 млн ₽ ГО)</span></div>
+      </div>
+      
+      <div class="total" style="border-color:#ea394355">
+        <div class="total-label">Итого по деньгам · ГО<div class="total-sub">чистый отток с рынка</div></div>
+        <div class="total-val" style="color:#ea3943">−9,30 млрд ₽</div>
+      </div>
+      <div class="footer">Срез 23:50 · обновлено 01.07.2026 09:32</div>
+    </section>
+    <section class="card" data-pair="usd" data-day="1" hidden>
+      <div class="title">Открытый интерес · USD/RUB</div>
+      <div class="subtitle">Контракты, по последнему срезу дня. Календарный и вечный — раздельно (разный ГО,
+        в один итог не суммируются). В скобках — изменение в деньгах: Δконтрактов × ГО на контракт.</div>
+      
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">Si · календарные</span><span class="leg-hint">квартальные контракты</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Чт, 18 июня</div>
+            <div class="cv">5 626 390</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Пт, 19 июня</div>
+            <div class="cv">5 650 459</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +24 069 <span class="pct">· +0.43%</span> <span class="money">(≈ +302,6 млн ₽ ГО)</span></div>
+      </div>
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">USDRUBF · вечный</span><span class="leg-hint">перпетуал</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Чт, 18 июня</div>
+            <div class="cv">791 844</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Пт, 19 июня</div>
+            <div class="cv">798 742</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +6 898 <span class="pct">· +0.87%</span> <span class="money">(≈ +81,1 млн ₽ ГО)</span></div>
+      </div>
+      
+      <div class="total" style="border-color:#16c78455">
+        <div class="total-label">Итого по деньгам · ГО<div class="total-sub">чистый приток на рынок</div></div>
+        <div class="total-val" style="color:#16c784">+383,7 млн ₽</div>
+      </div>
+      <div class="footer">Срез 23:50 · обновлено 01.07.2026 09:32</div>
+    </section>
+    <section class="card" data-pair="cny" data-day="1" hidden>
+      <div class="title">Открытый интерес · CNY/RUB</div>
+      <div class="subtitle">Контракты, по последнему срезу дня. Календарный и вечный — раздельно (разный ГО,
+        в один итог не суммируются). В скобках — изменение в деньгах: Δконтрактов × ГО на контракт.</div>
+      
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">CNY · календарные</span><span class="leg-hint">квартальные контракты</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Чт, 18 июня</div>
+            <div class="cv">18 898 234</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Пт, 19 июня</div>
+            <div class="cv">18 996 080</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +97 846 <span class="pct">· +0.52%</span> <span class="money">(≈ +114,7 млн ₽ ГО)</span></div>
+      </div>
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">CNYRUBF · вечный</span><span class="leg-hint">перпетуал</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Чт, 18 июня</div>
+            <div class="cv">8 366 885</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Пт, 19 июня</div>
+            <div class="cv">8 637 116</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +270 231 <span class="pct">· +3.23%</span> <span class="money">(≈ +252,0 млн ₽ ГО)</span></div>
+      </div>
+      
+      <div class="total" style="border-color:#16c78455">
+        <div class="total-label">Итого по деньгам · ГО<div class="total-sub">чистый приток на рынок</div></div>
+        <div class="total-val" style="color:#16c784">+366,7 млн ₽</div>
+      </div>
+      <div class="footer">Срез 23:50 · обновлено 01.07.2026 09:32</div>
+    </section>
+    <section class="card" data-pair="usd" data-day="2" hidden>
+      <div class="title">Открытый интерес · USD/RUB</div>
+      <div class="subtitle">Контракты, по последнему срезу дня. Календарный и вечный — раздельно (разный ГО,
+        в один итог не суммируются). В скобках — изменение в деньгах: Δконтрактов × ГО на контракт.</div>
+      
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">Si · календарные</span><span class="leg-hint">квартальные контракты</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Пт, 19 июня</div>
+            <div class="cv">5 650 459</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Пн, 22 июня</div>
+            <div class="cv">5 712 479</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +62 020 <span class="pct">· +1.10%</span> <span class="money">(≈ +779,8 млн ₽ ГО)</span></div>
+      </div>
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">USDRUBF · вечный</span><span class="leg-hint">перпетуал</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Пт, 19 июня</div>
+            <div class="cv">798 742</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Пн, 22 июня</div>
+            <div class="cv">803 901</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +5 159 <span class="pct">· +0.65%</span> <span class="money">(≈ +60,6 млн ₽ ГО)</span></div>
+      </div>
+      
+      <div class="total" style="border-color:#16c78455">
+        <div class="total-label">Итого по деньгам · ГО<div class="total-sub">чистый приток на рынок</div></div>
+        <div class="total-val" style="color:#16c784">+840,5 млн ₽</div>
+      </div>
+      <div class="footer">Срез 23:50 · обновлено 01.07.2026 09:32</div>
+    </section>
+    <section class="card" data-pair="cny" data-day="2" hidden>
+      <div class="title">Открытый интерес · CNY/RUB</div>
+      <div class="subtitle">Контракты, по последнему срезу дня. Календарный и вечный — раздельно (разный ГО,
+        в один итог не суммируются). В скобках — изменение в деньгах: Δконтрактов × ГО на контракт.</div>
+      
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">CNY · календарные</span><span class="leg-hint">квартальные контракты</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Пт, 19 июня</div>
+            <div class="cv">18 996 080</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Пн, 22 июня</div>
+            <div class="cv">19 192 440</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +196 360 <span class="pct">· +1.03%</span> <span class="money">(≈ +230,2 млн ₽ ГО)</span></div>
+      </div>
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">CNYRUBF · вечный</span><span class="leg-hint">перпетуал</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Пт, 19 июня</div>
+            <div class="cv">8 637 116</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#ea394355">
+            <div class="cl">Последний · Пн, 22 июня</div>
+            <div class="cv">8 350 584</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#ea3943">▼ −286 532 <span class="pct">· −3.32%</span> <span class="money">(≈ −267,2 млн ₽ ГО)</span></div>
+      </div>
+      
+      <div class="total" style="border-color:#ea394355">
+        <div class="total-label">Итого по деньгам · ГО<div class="total-sub">чистый отток с рынка</div></div>
+        <div class="total-val" style="color:#ea3943">−37,0 млн ₽</div>
+      </div>
+      <div class="footer">Срез 23:50 · обновлено 01.07.2026 09:32</div>
+    </section>
+    <section class="card" data-pair="usd" data-day="3" hidden>
+      <div class="title">Открытый интерес · USD/RUB</div>
+      <div class="subtitle">Контракты, по последнему срезу дня. Календарный и вечный — раздельно (разный ГО,
+        в один итог не суммируются). В скобках — изменение в деньгах: Δконтрактов × ГО на контракт.</div>
+      
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">Si · календарные</span><span class="leg-hint">квартальные контракты</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Пн, 22 июня</div>
+            <div class="cv">5 712 479</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Вт, 23 июня</div>
+            <div class="cv">5 823 099</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +110 620 <span class="pct">· +1.94%</span> <span class="money">(≈ +1,39 млрд ₽ ГО)</span></div>
+      </div>
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">USDRUBF · вечный</span><span class="leg-hint">перпетуал</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Пн, 22 июня</div>
+            <div class="cv">803 901</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#ea394355">
+            <div class="cl">Последний · Вт, 23 июня</div>
+            <div class="cv">766 138</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#ea3943">▼ −37 763 <span class="pct">· −4.70%</span> <span class="money">(≈ −443,9 млн ₽ ГО)</span></div>
+      </div>
+      
+      <div class="total" style="border-color:#16c78455">
+        <div class="total-label">Итого по деньгам · ГО<div class="total-sub">чистый приток на рынок</div></div>
+        <div class="total-val" style="color:#16c784">+947,0 млн ₽</div>
+      </div>
+      <div class="footer">Срез 23:50 · обновлено 01.07.2026 09:32</div>
+    </section>
+    <section class="card" data-pair="cny" data-day="3" hidden>
+      <div class="title">Открытый интерес · CNY/RUB</div>
+      <div class="subtitle">Контракты, по последнему срезу дня. Календарный и вечный — раздельно (разный ГО,
+        в один итог не суммируются). В скобках — изменение в деньгах: Δконтрактов × ГО на контракт.</div>
+      
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">CNY · календарные</span><span class="leg-hint">квартальные контракты</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Пн, 22 июня</div>
+            <div class="cv">19 192 440</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Вт, 23 июня</div>
+            <div class="cv">20 721 918</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +1 529 478 <span class="pct">· +7.97%</span> <span class="money">(≈ +1,79 млрд ₽ ГО)</span></div>
+      </div>
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">CNYRUBF · вечный</span><span class="leg-hint">перпетуал</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Пн, 22 июня</div>
+            <div class="cv">8 350 584</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Вт, 23 июня</div>
+            <div class="cv">8 504 173</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +153 589 <span class="pct">· +1.84%</span> <span class="money">(≈ +143,2 млн ₽ ГО)</span></div>
+      </div>
+      
+      <div class="total" style="border-color:#16c78455">
+        <div class="total-label">Итого по деньгам · ГО<div class="total-sub">чистый приток на рынок</div></div>
+        <div class="total-val" style="color:#16c784">+1,94 млрд ₽</div>
+      </div>
+      <div class="footer">Срез 23:50 · обновлено 01.07.2026 09:32</div>
+    </section>
+    <section class="card" data-pair="usd" data-day="4" hidden>
+      <div class="title">Открытый интерес · USD/RUB</div>
+      <div class="subtitle">Контракты, по последнему срезу дня. Календарный и вечный — раздельно (разный ГО,
+        в один итог не суммируются). В скобках — изменение в деньгах: Δконтрактов × ГО на контракт.</div>
+      
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">Si · календарные</span><span class="leg-hint">квартальные контракты</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Вт, 23 июня</div>
+            <div class="cv">5 823 099</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#ea394355">
+            <div class="cl">Последний · Ср, 24 июня</div>
+            <div class="cv">5 818 682</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#ea3943">▼ −4 417 <span class="pct">· −0.08%</span> <span class="money">(≈ −55,5 млн ₽ ГО)</span></div>
+      </div>
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">USDRUBF · вечный</span><span class="leg-hint">перпетуал</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Вт, 23 июня</div>
+            <div class="cv">766 138</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#ea394355">
+            <div class="cl">Последний · Ср, 24 июня</div>
+            <div class="cv">748 177</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#ea3943">▼ −17 961 <span class="pct">· −2.34%</span> <span class="money">(≈ −211,1 млн ₽ ГО)</span></div>
+      </div>
+      
+      <div class="total" style="border-color:#ea394355">
+        <div class="total-label">Итого по деньгам · ГО<div class="total-sub">чистый отток с рынка</div></div>
+        <div class="total-val" style="color:#ea3943">−266,7 млн ₽</div>
+      </div>
+      <div class="footer">Срез 23:50 · обновлено 01.07.2026 09:32</div>
+    </section>
+    <section class="card" data-pair="cny" data-day="4" hidden>
+      <div class="title">Открытый интерес · CNY/RUB</div>
+      <div class="subtitle">Контракты, по последнему срезу дня. Календарный и вечный — раздельно (разный ГО,
+        в один итог не суммируются). В скобках — изменение в деньгах: Δконтрактов × ГО на контракт.</div>
+      
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">CNY · календарные</span><span class="leg-hint">квартальные контракты</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Вт, 23 июня</div>
+            <div class="cv">20 721 918</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Ср, 24 июня</div>
+            <div class="cv">21 056 438</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +334 520 <span class="pct">· +1.61%</span> <span class="money">(≈ +392,2 млн ₽ ГО)</span></div>
+      </div>
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">CNYRUBF · вечный</span><span class="leg-hint">перпетуал</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Вт, 23 июня</div>
+            <div class="cv">8 504 173</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Ср, 24 июня</div>
+            <div class="cv">8 712 870</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +208 697 <span class="pct">· +2.45%</span> <span class="money">(≈ +194,6 млн ₽ ГО)</span></div>
+      </div>
+      
+      <div class="total" style="border-color:#16c78455">
+        <div class="total-label">Итого по деньгам · ГО<div class="total-sub">чистый приток на рынок</div></div>
+        <div class="total-val" style="color:#16c784">+586,8 млн ₽</div>
+      </div>
+      <div class="footer">Срез 23:50 · обновлено 01.07.2026 09:32</div>
+    </section>
+    <section class="card" data-pair="usd" data-day="5" hidden>
+      <div class="title">Открытый интерес · USD/RUB</div>
+      <div class="subtitle">Контракты, по последнему срезу дня. Календарный и вечный — раздельно (разный ГО,
+        в один итог не суммируются). В скобках — изменение в деньгах: Δконтрактов × ГО на контракт.</div>
+      
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">Si · календарные</span><span class="leg-hint">квартальные контракты</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Ср, 24 июня</div>
+            <div class="cv">5 818 682</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Чт, 25 июня</div>
+            <div class="cv">5 828 719</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +10 037 <span class="pct">· +0.17%</span> <span class="money">(≈ +126,2 млн ₽ ГО)</span></div>
+      </div>
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">USDRUBF · вечный</span><span class="leg-hint">перпетуал</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Ср, 24 июня</div>
+            <div class="cv">748 177</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#ea394355">
+            <div class="cl">Последний · Чт, 25 июня</div>
+            <div class="cv">723 704</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#ea3943">▼ −24 473 <span class="pct">· −3.27%</span> <span class="money">(≈ −287,7 млн ₽ ГО)</span></div>
+      </div>
+      
+      <div class="total" style="border-color:#ea394355">
+        <div class="total-label">Итого по деньгам · ГО<div class="total-sub">чистый отток с рынка</div></div>
+        <div class="total-val" style="color:#ea3943">−161,5 млн ₽</div>
+      </div>
+      <div class="footer">Срез 23:50 · обновлено 01.07.2026 09:32</div>
+    </section>
+    <section class="card" data-pair="cny" data-day="5" hidden>
+      <div class="title">Открытый интерес · CNY/RUB</div>
+      <div class="subtitle">Контракты, по последнему срезу дня. Календарный и вечный — раздельно (разный ГО,
+        в один итог не суммируются). В скобках — изменение в деньгах: Δконтрактов × ГО на контракт.</div>
+      
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">CNY · календарные</span><span class="leg-hint">квартальные контракты</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Ср, 24 июня</div>
+            <div class="cv">21 056 438</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Чт, 25 июня</div>
+            <div class="cv">22 627 528</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +1 571 090 <span class="pct">· +7.46%</span> <span class="money">(≈ +1,84 млрд ₽ ГО)</span></div>
+      </div>
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">CNYRUBF · вечный</span><span class="leg-hint">перпетуал</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Ср, 24 июня</div>
+            <div class="cv">8 712 870</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Чт, 25 июня</div>
+            <div class="cv">9 030 142</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +317 272 <span class="pct">· +3.64%</span> <span class="money">(≈ +295,9 млн ₽ ГО)</span></div>
+      </div>
+      
+      <div class="total" style="border-color:#16c78455">
+        <div class="total-label">Итого по деньгам · ГО<div class="total-sub">чистый приток на рынок</div></div>
+        <div class="total-val" style="color:#16c784">+2,14 млрд ₽</div>
+      </div>
+      <div class="footer">Срез 23:50 · обновлено 01.07.2026 09:32</div>
+    </section>
+    <section class="card" data-pair="usd" data-day="6" hidden>
+      <div class="title">Открытый интерес · USD/RUB</div>
+      <div class="subtitle">Контракты, по последнему срезу дня. Календарный и вечный — раздельно (разный ГО,
+        в один итог не суммируются). В скобках — изменение в деньгах: Δконтрактов × ГО на контракт.</div>
+      
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">Si · календарные</span><span class="leg-hint">квартальные контракты</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Чт, 25 июня</div>
+            <div class="cv">5 828 719</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#ea394355">
+            <div class="cl">Последний · Пт, 26 июня</div>
+            <div class="cv">5 604 551</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#ea3943">▼ −224 168 <span class="pct">· −3.85%</span> <span class="money">(≈ −2,82 млрд ₽ ГО)</span></div>
+      </div>
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">USDRUBF · вечный</span><span class="leg-hint">перпетуал</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Чт, 25 июня</div>
+            <div class="cv">723 704</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#ea394355">
+            <div class="cl">Последний · Пт, 26 июня</div>
+            <div class="cv">695 826</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#ea3943">▼ −27 878 <span class="pct">· −3.85%</span> <span class="money">(≈ −327,7 млн ₽ ГО)</span></div>
+      </div>
+      
+      <div class="total" style="border-color:#ea394355">
+        <div class="total-label">Итого по деньгам · ГО<div class="total-sub">чистый отток с рынка</div></div>
+        <div class="total-val" style="color:#ea3943">−3,15 млрд ₽</div>
+      </div>
+      <div class="footer">Срез 23:50 · обновлено 01.07.2026 09:32</div>
+    </section>
+    <section class="card" data-pair="cny" data-day="6" hidden>
+      <div class="title">Открытый интерес · CNY/RUB</div>
+      <div class="subtitle">Контракты, по последнему срезу дня. Календарный и вечный — раздельно (разный ГО,
+        в один итог не суммируются). В скобках — изменение в деньгах: Δконтрактов × ГО на контракт.</div>
+      
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">CNY · календарные</span><span class="leg-hint">квартальные контракты</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Чт, 25 июня</div>
+            <div class="cv">22 627 528</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#ea394355">
+            <div class="cl">Последний · Пт, 26 июня</div>
+            <div class="cv">22 492 149</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#ea3943">▼ −135 379 <span class="pct">· −0.60%</span> <span class="money">(≈ −158,7 млн ₽ ГО)</span></div>
+      </div>
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">CNYRUBF · вечный</span><span class="leg-hint">перпетуал</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Чт, 25 июня</div>
+            <div class="cv">9 030 142</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#ea394355">
+            <div class="cl">Последний · Пт, 26 июня</div>
+            <div class="cv">8 891 848</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#ea3943">▼ −138 294 <span class="pct">· −1.53%</span> <span class="money">(≈ −129,0 млн ₽ ГО)</span></div>
+      </div>
+      
+      <div class="total" style="border-color:#ea394355">
+        <div class="total-label">Итого по деньгам · ГО<div class="total-sub">чистый отток с рынка</div></div>
+        <div class="total-val" style="color:#ea3943">−287,7 млн ₽</div>
+      </div>
+      <div class="footer">Срез 23:50 · обновлено 01.07.2026 09:32</div>
+    </section>
+    <section class="card" data-pair="usd" data-day="7" hidden>
+      <div class="title">Открытый интерес · USD/RUB</div>
+      <div class="subtitle">Контракты, по последнему срезу дня. Календарный и вечный — раздельно (разный ГО,
+        в один итог не суммируются). В скобках — изменение в деньгах: Δконтрактов × ГО на контракт.</div>
+      
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">Si · календарные</span><span class="leg-hint">квартальные контракты</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Пт, 26 июня</div>
+            <div class="cv">5 604 551</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Пн, 29 июня</div>
+            <div class="cv">5 698 884</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +94 333 <span class="pct">· +1.68%</span> <span class="money">(≈ +1,19 млрд ₽ ГО)</span></div>
+      </div>
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">USDRUBF · вечный</span><span class="leg-hint">перпетуал</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Пт, 26 июня</div>
+            <div class="cv">695 826</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Пн, 29 июня</div>
+            <div class="cv">706 127</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +10 301 <span class="pct">· +1.48%</span> <span class="money">(≈ +121,1 млн ₽ ГО)</span></div>
+      </div>
+      
+      <div class="total" style="border-color:#16c78455">
+        <div class="total-label">Итого по деньгам · ГО<div class="total-sub">чистый приток на рынок</div></div>
+        <div class="total-val" style="color:#16c784">+1,31 млрд ₽</div>
+      </div>
+      <div class="footer">Срез 23:50 · обновлено 01.07.2026 09:32</div>
+    </section>
+    <section class="card" data-pair="cny" data-day="7" hidden>
+      <div class="title">Открытый интерес · CNY/RUB</div>
+      <div class="subtitle">Контракты, по последнему срезу дня. Календарный и вечный — раздельно (разный ГО,
+        в один итог не суммируются). В скобках — изменение в деньгах: Δконтрактов × ГО на контракт.</div>
+      
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">CNY · календарные</span><span class="leg-hint">квартальные контракты</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Пт, 26 июня</div>
+            <div class="cv">22 492 149</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Пн, 29 июня</div>
+            <div class="cv">23 364 327</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +872 178 <span class="pct">· +3.88%</span> <span class="money">(≈ +1,02 млрд ₽ ГО)</span></div>
+      </div>
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">CNYRUBF · вечный</span><span class="leg-hint">перпетуал</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Пт, 26 июня</div>
+            <div class="cv">8 891 848</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#ea394355">
+            <div class="cl">Последний · Пн, 29 июня</div>
+            <div class="cv">8 797 372</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#ea3943">▼ −94 476 <span class="pct">· −1.06%</span> <span class="money">(≈ −88,1 млн ₽ ГО)</span></div>
+      </div>
+      
+      <div class="total" style="border-color:#16c78455">
+        <div class="total-label">Итого по деньгам · ГО<div class="total-sub">чистый приток на рынок</div></div>
+        <div class="total-val" style="color:#16c784">+934,4 млн ₽</div>
+      </div>
+      <div class="footer">Срез 23:50 · обновлено 01.07.2026 09:32</div>
+    </section>
+    <section class="card" data-pair="usd" data-day="8" hidden>
       <div class="title">Открытый интерес · USD/RUB</div>
       <div class="subtitle">Контракты, по последнему срезу дня. Календарный и вечный — раздельно (разный ГО,
         в один итог не суммируются). В скобках — изменение в деньгах: Δконтрактов × ГО на контракт.</div>
@@ -79,7 +765,7 @@
             <div class="cv">5 710 344</div>
           </div>
         </div>
-        <div class="leg-delta" style="color:#16c784">▲ +11 460 <span class="pct">· +0.20%</span> <span class="money">(≈ +142,9 млн ₽ ГО)</span></div>
+        <div class="leg-delta" style="color:#16c784">▲ +11 460 <span class="pct">· +0.20%</span> <span class="money">(≈ +144,1 млн ₽ ГО)</span></div>
       </div>
       <div class="leg">
         <div class="leg-head"><span class="leg-name">USDRUBF · вечный</span><span class="leg-hint">перпетуал</span></div>
@@ -94,16 +780,16 @@
             <div class="cv">669 137</div>
           </div>
         </div>
-        <div class="leg-delta" style="color:#ea3943">▼ −36 990 <span class="pct">· −5.24%</span> <span class="money">(≈ −432,0 млн ₽ ГО)</span></div>
+        <div class="leg-delta" style="color:#ea3943">▼ −36 990 <span class="pct">· −5.24%</span> <span class="money">(≈ −434,8 млн ₽ ГО)</span></div>
       </div>
       
       <div class="total" style="border-color:#ea394355">
         <div class="total-label">Итого по деньгам · ГО<div class="total-sub">чистый отток с рынка</div></div>
-        <div class="total-val" style="color:#ea3943">−289,1 млн ₽</div>
+        <div class="total-val" style="color:#ea3943">−290,7 млн ₽</div>
       </div>
-      <div class="footer">Срез 23:50 · обновлено 01.07.2026 08:49</div>
+      <div class="footer">Срез 23:50 · обновлено 01.07.2026 09:32</div>
     </section>
-    <section class="card" data-pair="cny" hidden>
+    <section class="card" data-pair="cny" data-day="8" hidden>
       <div class="title">Открытый интерес · CNY/RUB</div>
       <div class="subtitle">Контракты, по последнему срезу дня. Календарный и вечный — раздельно (разный ГО,
         в один итог не суммируются). В скобках — изменение в деньгах: Δконтрактов × ГО на контракт.</div>
@@ -121,7 +807,7 @@
             <div class="cv">23 929 764</div>
           </div>
         </div>
-        <div class="leg-delta" style="color:#16c784">▲ +565 437 <span class="pct">· +2.42%</span> <span class="money">(≈ +649,8 млн ₽ ГО)</span></div>
+        <div class="leg-delta" style="color:#16c784">▲ +565 437 <span class="pct">· +2.42%</span> <span class="money">(≈ +662,9 млн ₽ ГО)</span></div>
       </div>
       <div class="leg">
         <div class="leg-head"><span class="leg-name">CNYRUBF · вечный</span><span class="leg-hint">перпетуал</span></div>
@@ -136,25 +822,130 @@
             <div class="cv">8 593 184</div>
           </div>
         </div>
-        <div class="leg-delta" style="color:#ea3943">▼ −204 188 <span class="pct">· −2.32%</span> <span class="money">(≈ −186,6 млн ₽ ГО)</span></div>
+        <div class="leg-delta" style="color:#ea3943">▼ −204 188 <span class="pct">· −2.32%</span> <span class="money">(≈ −190,4 млн ₽ ГО)</span></div>
       </div>
       
       <div class="total" style="border-color:#16c78455">
         <div class="total-label">Итого по деньгам · ГО<div class="total-sub">чистый приток на рынок</div></div>
-        <div class="total-val" style="color:#16c784">+463,2 млн ₽</div>
+        <div class="total-val" style="color:#16c784">+472,5 млн ₽</div>
       </div>
-      <div class="footer">Срез 23:50 · обновлено 01.07.2026 08:49</div>
+      <div class="footer">Срез 23:50 · обновлено 01.07.2026 09:32</div>
+    </section>
+    <section class="card" data-pair="usd" data-day="9">
+      <div class="title">Открытый интерес · USD/RUB</div>
+      <div class="subtitle">Контракты, по последнему срезу дня. Календарный и вечный — раздельно (разный ГО,
+        в один итог не суммируются). В скобках — изменение в деньгах: Δконтрактов × ГО на контракт.</div>
+      
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">Si · календарные</span><span class="leg-hint">квартальные контракты</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Вт, 30 июня</div>
+            <div class="cv">5 710 344</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Ср, 1 июля</div>
+            <div class="cv">5 716 419</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +6 075 <span class="pct">· +0.11%</span> <span class="money">(≈ +76,4 млн ₽ ГО)</span></div>
+      </div>
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">USDRUBF · вечный</span><span class="leg-hint">перпетуал</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Вт, 30 июня</div>
+            <div class="cv">669 137</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Ср, 1 июля</div>
+            <div class="cv">671 601</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +2 464 <span class="pct">· +0.37%</span> <span class="money">(≈ +29,0 млн ₽ ГО)</span></div>
+      </div>
+      
+      <div class="total" style="border-color:#16c78455">
+        <div class="total-label">Итого по деньгам · ГО<div class="total-sub">чистый приток на рынок</div></div>
+        <div class="total-val" style="color:#16c784">+105,4 млн ₽</div>
+      </div>
+      <div class="footer">Срез 09:30 · обновлено 01.07.2026 09:32</div>
+    </section>
+    <section class="card" data-pair="cny" data-day="9" hidden>
+      <div class="title">Открытый интерес · CNY/RUB</div>
+      <div class="subtitle">Контракты, по последнему срезу дня. Календарный и вечный — раздельно (разный ГО,
+        в один итог не суммируются). В скобках — изменение в деньгах: Δконтрактов × ГО на контракт.</div>
+      
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">CNY · календарные</span><span class="leg-hint">квартальные контракты</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Вт, 30 июня</div>
+            <div class="cv">23 929 764</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Ср, 1 июля</div>
+            <div class="cv">24 013 048</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +83 284 <span class="pct">· +0.35%</span> <span class="money">(≈ +97,6 млн ₽ ГО)</span></div>
+      </div>
+      <div class="leg">
+        <div class="leg-head"><span class="leg-name">CNYRUBF · вечный</span><span class="leg-hint">перпетуал</span></div>
+        <div class="row">
+          <div class="cell">
+            <div class="cl">Предыдущий · Вт, 30 июня</div>
+            <div class="cv">8 593 184</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="cell latest" style="border-color:#16c78455">
+            <div class="cl">Последний · Ср, 1 июля</div>
+            <div class="cv">8 613 597</div>
+          </div>
+        </div>
+        <div class="leg-delta" style="color:#16c784">▲ +20 413 <span class="pct">· +0.24%</span> <span class="money">(≈ +19,0 млн ₽ ГО)</span></div>
+      </div>
+      
+      <div class="total" style="border-color:#16c78455">
+        <div class="total-label">Итого по деньгам · ГО<div class="total-sub">чистый приток на рынок</div></div>
+        <div class="total-val" style="color:#16c784">+116,7 млн ₽</div>
+      </div>
+      <div class="footer">Срез 09:30 · обновлено 01.07.2026 09:32</div>
     </section>
 <script>
-  document.querySelectorAll('.tab').forEach(function (t) {
-    t.addEventListener('click', function () {
-      document.querySelectorAll('.tab').forEach(function (x) { x.classList.remove('active'); });
-      t.classList.add('active');
-      document.querySelectorAll('.card').forEach(function (c) {
-        c.hidden = (c.dataset.pair !== t.dataset.pair);
-      });
+  var DAYS = ["Чт, 18 июня", "Пт, 19 июня", "Пн, 22 июня", "Вт, 23 июня", "Ср, 24 июня", "Чт, 25 июня", "Пт, 26 июня", "Пн, 29 июня", "Вт, 30 июня", "Ср, 1 июля"];
+  var MAXDAY = DAYS.length - 1;
+  var pair = 'usd', day = MAXDAY;
+
+  // восстановить выбор после авто-обновления страницы (offset от последнего дня)
+  try {
+    var s = JSON.parse(sessionStorage.getItem('oiState') || '{}');
+    if (s.pair) pair = s.pair;
+    if (typeof s.offset === 'number') day = Math.max(0, MAXDAY - s.offset);
+  } catch (e) {}
+
+  function render() {
+    document.querySelectorAll('.tab').forEach(function (t) {
+      t.classList.toggle('active', t.dataset.pair === pair);
     });
+    document.querySelectorAll('.card').forEach(function (c) {
+      c.hidden = !(c.dataset.pair === pair && +c.dataset.day === day);
+    });
+    document.getElementById('dayLabel').textContent = 'Показан день: ' + DAYS[day];
+    document.getElementById('prevDay').disabled = (day <= 0);
+    document.getElementById('nextDay').disabled = (day >= MAXDAY);
+    try { sessionStorage.setItem('oiState', JSON.stringify({ pair: pair, offset: MAXDAY - day })); } catch (e) {}
+  }
+
+  document.querySelectorAll('.tab').forEach(function (t) {
+    t.addEventListener('click', function () { pair = t.dataset.pair; render(); });
   });
+  document.getElementById('prevDay').addEventListener('click', function () { if (day > 0) { day--; render(); } });
+  document.getElementById('nextDay').addEventListener('click', function () { if (day < MAXDAY) { day++; render(); } });
+  render();
 </script>
 </body>
 </html>

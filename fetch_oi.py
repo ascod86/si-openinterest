@@ -16,7 +16,9 @@
 import requests
 import os
 import sys
+import json
 from datetime import date, datetime, timedelta
+from concurrent.futures import ThreadPoolExecutor
 
 BASE_DIR = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.abspath(__file__))
 CARD_FILE = os.path.join(BASE_DIR, "si_openinterest.html")
@@ -69,41 +71,46 @@ MONTHS = ["", "января", "февраля", "марта", "апреля", "�
           "июля", "августа", "сентября", "октября", "ноября", "декабря"]
 
 
-def fetch_asset(asset: str, frm: date, till: date) -> list:
-    """Снимки открытого интереса одного актива за период."""
-    url = (
-        f"https://apim.moex.com/iss/analyticalproducts/futoi/securities/{asset}.json"
-        f"?from={frm}&till={till}&limit=1000&iss.meta=off"
-    )
-    rows = SESSION.get(url, timeout=20).json()["futoi"]["data"]
-    return [r for r in rows if len(r) >= 13]  # отсекаем служебные строки-ошибки
+def fetch_day(d: date):
+    """ОИ (сумма лонгов) на последнем срезе одного дня по всем активам.
+    apim игнорирует start на диапазоне, поэтому качаем строго по одному дню
+    (в дне ~340 строк на актив — влезает в лимит без пагинации).
+    Возвращает (dateISO, {ticker: oi}, 'HH:MM:SS') или None, если данных нет."""
+    rows = []
+    for code in FUTOI_CODES:
+        url = (
+            f"https://apim.moex.com/iss/analyticalproducts/futoi/securities/{code}.json"
+            f"?from={d}&till={d}&limit=1000&iss.meta=off"
+        )
+        page = SESSION.get(url, timeout=20).json()["futoi"]["data"]
+        rows.extend(r for r in page if len(r) >= 13)  # отсекаем служебные строки-ошибки
+    if not rows:
+        return None
+
+    last = max(r[1] for r in rows)  # последний seqnum (конец дня), общий для всех активов
+    ltime = next(r[3] for r in rows if r[1] == last)
+    oi = {}
+    for r in rows:
+        if r[1] == last:
+            oi[r[4]] = oi.get(r[4], 0) + r[7]  # r[4]=ticker, r[7]=pos_long
+    return str(d), oi, ltime
 
 
 def daily_oi() -> tuple:
-    """ОИ (сумма лонгов) на последнем срезе каждого дня по всем активам.
+    """ОИ на последнем срезе каждого торгового дня за последние ~2 недели.
     Возвращает (by_day: {date: {ticker: oi}}, times: {date: 'HH:MM:SS'})."""
     till = date.today()
-    frm = till - timedelta(days=10)
+    frm = till - timedelta(days=14)
+    days = [frm + timedelta(days=i) for i in range((till - frm).days + 1)
+            if (frm + timedelta(days=i)).weekday() < 5]
 
-    rows = []
-    for code in FUTOI_CODES:
-        rows.extend(fetch_asset(code, frm, till))
-
-    # seqnum общий для всех активов — последний срез дня один на всех
-    last_seq = {}
-    for r in rows:
-        d, seq = r[12], r[1]
-        if d not in last_seq or seq > last_seq[d][0]:
-            last_seq[d] = (seq, r[3])
-
-    by_day = {}
-    for r in rows:
-        d, seq, ticker, pos_long = r[12], r[1], r[4], r[7]
-        if seq == last_seq[d][0]:
-            day = by_day.setdefault(d, {})
-            day[ticker] = day.get(ticker, 0) + pos_long
-
-    return by_day, {d: last_seq[d][1] for d in last_seq}
+    by_day, times = {}, {}
+    with ThreadPoolExecutor(max_workers=8) as ex:
+        for res in ex.map(fetch_day, days):
+            if res:
+                d, oi, ltime = res
+                by_day[d], times[d] = oi, ltime
+    return by_day, times
 
 
 def get_margins() -> tuple:
@@ -177,16 +184,16 @@ def leg_block(name: str, hint: str, p_date: str, l_date: str, p_val: int, l_val:
       </div>"""
 
 
-def build_panel(pair: dict, by_day: dict, times: dict, cal_im: dict, perp_im: dict) -> str:
+def build_panel(pair: dict, p_date: str, l_date: str, by_day: dict, times: dict,
+                cal_im: dict, perp_im: dict, day_index: int, visible: bool) -> str:
     cal, perp = pair["cal"], pair["perp"]
-    p, l = sorted(by_day)[-2:]
-    p_cal, l_cal = by_day[p].get(cal["futoi"], 0), by_day[l].get(cal["futoi"], 0)
-    p_perp, l_perp = by_day[p].get(perp["futoi"], 0), by_day[l].get(perp["futoi"], 0)
+    p_cal, l_cal = by_day[p_date].get(cal["futoi"], 0), by_day[l_date].get(cal["futoi"], 0)
+    p_perp, l_perp = by_day[p_date].get(perp["futoi"], 0), by_day[l_date].get(perp["futoi"], 0)
     c_margin, p_margin = cal_im.get(cal["forts_asset"]), perp_im.get(perp["forts_secid"])
 
     legs = (
-        leg_block(cal["name"], cal["hint"], p, l, p_cal, l_cal, c_margin)
-        + leg_block(perp["name"], perp["hint"], p, l, p_perp, l_perp, p_margin)
+        leg_block(cal["name"], cal["hint"], p_date, l_date, p_cal, l_cal, c_margin)
+        + leg_block(perp["name"], perp["hint"], p_date, l_date, p_perp, l_perp, p_margin)
     )
 
     total_html = ""
@@ -202,15 +209,15 @@ def build_panel(pair: dict, by_day: dict, times: dict, cal_im: dict, perp_im: di
         <div class="total-val" style="color:{t_color}">{t_sign}{fmt_money(abs(net))}</div>
       </div>"""
 
-    hidden = "" if pair["key"] == "usd" else " hidden"
+    hidden = "" if visible else " hidden"
     return f"""
-    <section class="card" data-pair="{pair['key']}"{hidden}>
+    <section class="card" data-pair="{pair['key']}" data-day="{day_index}"{hidden}>
       <div class="title">Открытый интерес · {pair['title']}</div>
       <div class="subtitle">Контракты, по последнему срезу дня. Календарный и вечный — раздельно (разный ГО,
         в один итог не суммируются). В скобках — изменение в деньгах: Δконтрактов × ГО на контракт.</div>
       {legs}
       {total_html}
-      <div class="footer">Срез {times[l][:5]} · обновлено {datetime.now().strftime('%d.%m.%Y %H:%M')}</div>
+      <div class="footer">Срез {times[l_date][:5]} · обновлено {datetime.now().strftime('%d.%m.%Y %H:%M')}</div>
     </section>"""
 
 
@@ -220,7 +227,19 @@ def build_card(by_day: dict, times: dict):
         f'<button class="tab{" active" if p["key"]=="usd" else ""}" data-pair="{p["key"]}">{p["tab"]}</button>'
         for p in PAIRS
     )
-    panels = "".join(build_panel(p, by_day, times, cal_im, perp_im) for p in PAIRS)
+
+    dates = sorted(by_day)
+    # Виды: для каждого v сравниваем dates[v] (предыдущий) → dates[v+1] (показываемый день).
+    views = list(range(len(dates) - 1))
+    latest = views[-1]
+    panels = ""
+    for v in views:
+        p_date, l_date = dates[v], dates[v + 1]
+        for pair in PAIRS:
+            visible = (v == latest and pair["key"] == "usd")
+            panels += build_panel(pair, p_date, l_date, by_day, times,
+                                   cal_im, perp_im, v, visible)
+    day_labels = json.dumps([fmt_date(dates[v + 1]) for v in views], ensure_ascii=False)
 
     html = f"""<!DOCTYPE html>
 <html lang="ru">
@@ -249,6 +268,15 @@ def build_card(by_day: dict, times: dict):
   }}
   .tab:hover {{ color: #e6edf3; }}
   .tab.active {{ background: #1f6feb; color: #fff; }}
+  .daynav {{ display: inline-flex; align-items: center; gap: 12px; }}
+  .navbtn {{
+    border: 1px solid #232a33; cursor: pointer; padding: 7px 14px; border-radius: 9px;
+    font-size: 13px; font-weight: 700; color: #c9d1d9; background: #161b22;
+    font-family: inherit; transition: .15s;
+  }}
+  .navbtn:hover:not(:disabled) {{ border-color: #1f6feb; color: #fff; }}
+  .navbtn:disabled {{ opacity: .35; cursor: default; }}
+  .daylabel {{ font-size: 13px; font-weight: 700; color: #8b949e; min-width: 150px; text-align: center; }}
   .card {{
     width: 560px; max-width: 92vw;
     background: #161b22; border: 1px solid #232a33; border-radius: 20px;
@@ -284,17 +312,43 @@ def build_card(by_day: dict, times: dict):
 </head>
 <body>
   <div class="tabs">{tabs}</div>
+  <div class="daynav">
+    <button id="prevDay" class="navbtn">◀ Пред. день</button>
+    <span id="dayLabel" class="daylabel"></span>
+    <button id="nextDay" class="navbtn">След. день ▶</button>
+  </div>
   {panels}
 <script>
-  document.querySelectorAll('.tab').forEach(function (t) {{
-    t.addEventListener('click', function () {{
-      document.querySelectorAll('.tab').forEach(function (x) {{ x.classList.remove('active'); }});
-      t.classList.add('active');
-      document.querySelectorAll('.card').forEach(function (c) {{
-        c.hidden = (c.dataset.pair !== t.dataset.pair);
-      }});
+  var DAYS = {day_labels};
+  var MAXDAY = DAYS.length - 1;
+  var pair = 'usd', day = MAXDAY;
+
+  // восстановить выбор после авто-обновления страницы (offset от последнего дня)
+  try {{
+    var s = JSON.parse(sessionStorage.getItem('oiState') || '{{}}');
+    if (s.pair) pair = s.pair;
+    if (typeof s.offset === 'number') day = Math.max(0, MAXDAY - s.offset);
+  }} catch (e) {{}}
+
+  function render() {{
+    document.querySelectorAll('.tab').forEach(function (t) {{
+      t.classList.toggle('active', t.dataset.pair === pair);
     }});
+    document.querySelectorAll('.card').forEach(function (c) {{
+      c.hidden = !(c.dataset.pair === pair && +c.dataset.day === day);
+    }});
+    document.getElementById('dayLabel').textContent = 'Показан день: ' + DAYS[day];
+    document.getElementById('prevDay').disabled = (day <= 0);
+    document.getElementById('nextDay').disabled = (day >= MAXDAY);
+    try {{ sessionStorage.setItem('oiState', JSON.stringify({{ pair: pair, offset: MAXDAY - day }})); }} catch (e) {{}}
+  }}
+
+  document.querySelectorAll('.tab').forEach(function (t) {{
+    t.addEventListener('click', function () {{ pair = t.dataset.pair; render(); }});
   }});
+  document.getElementById('prevDay').addEventListener('click', function () {{ if (day > 0) {{ day--; render(); }} }});
+  document.getElementById('nextDay').addEventListener('click', function () {{ if (day < MAXDAY) {{ day++; render(); }} }});
+  render();
 </script>
 </body>
 </html>"""
